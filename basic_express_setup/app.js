@@ -3,7 +3,7 @@
  */
 const express = require('express');
 const bodyParser = require('body-parser');
-const Joi = require('@hapi/joi');
+const { validateUser } = require('./helper');
 
 // Create an express application
 const app = express();
@@ -75,22 +75,10 @@ app.get('/users/:id', (req, res) => {
 
 // Create new user route
 app.post('/users', (req, res) => {
-	// Define request body schema
-	const userSchema = Joi.object().keys({
-		name: Joi.string()
-			.min(3)
-			.required(),
-		email: Joi.string()
-			.email()
-			.required()
-	});
-
-	// Validate request data against defined schema
-	const { error, value } = Joi.validate(req.body, userSchema);
-
+	const { error, value } = validateUser(req);
 	// Return error if request body is invalid
 	if (error) {
-		return res.status(400).json(error);
+		return res.status(400).json(error.details);
 	}
 
 	// Construct new user
