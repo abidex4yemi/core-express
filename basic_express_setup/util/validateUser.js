@@ -3,7 +3,7 @@
  */
 const Joi = require('@hapi/joi');
 
-const validateUser = req => {
+const validateUser = (req, res, next) => {
 	// Define request body schema
 	const userSchema = Joi.object().keys({
 		name: Joi.string()
@@ -15,7 +15,15 @@ const validateUser = req => {
 	});
 
 	// Validate request data against defined schema
-	return Joi.validate(req.body, userSchema);
+	const { error, value } = Joi.validate(req.body, userSchema);
+
+	if (error) {
+		return res.status(400).json(error.details);
+	}
+
+	req.body.user = value;
+
+	return next();
 };
 
 module.exports.validateUser = validateUser;
