@@ -3,15 +3,20 @@
  */
 const express = require('express');
 const bodyParser = require('body-parser');
+const Joi = require('@hapi/joi');
 
+// Create an express application
 const app = express();
 
+// parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
+
+// parse application/json
 app.use(bodyParser.json());
 
 const PORT = process.env.PORT || 3000;
 
-// Users
+// Initial list of users
 const users = [
 	{
 		id: 1,
@@ -70,17 +75,34 @@ app.get('/users/:id', (req, res) => {
 
 // Create new user route
 app.post('/users', (req, res) => {
-	if (req.body.name && req.body.email) {
-		const newUser = {
-			...req.body,
-			id: users.length + 1
-		};
-		users.push(newUser);
+	// Define request body schema
+	const userSchema = Joi.object().keys({
+		name: Joi.string()
+			.min(3)
+			.required(),
+		email: Joi.string()
+			.email()
+			.required()
+	});
 
-		return res.status(201).json(newUser);
+	// Validate request data against defined schema
+	const { error, value } = Joi.validate(req.body, userSchema);
+
+	// Return error if request body is invalid
+	if (error) {
+		return res.status(400).json(error);
 	}
 
-	return res.status(400).json({ message: 'Try again...' });
+	// Construct new user
+	const newUser = {
+		id: users.length + 1,
+		...value
+	};
+
+	// Add new user to existing users list
+	users.unshift(newUser);
+
+	return res.status(201).json(newUser);
 });
 
 app.listen(PORT, console.log('Server running on port:' + PORT));
