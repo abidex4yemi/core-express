@@ -66,6 +66,7 @@ app.get('/users/:id', (req, res) => {
 	const { id } = req.params;
 
 	const user = users.find(user => parseInt(id, 10) === user.id);
+
 	if (user) {
 		return res.status(200).json({ user });
 	}
@@ -93,9 +94,11 @@ app.post('/users', (req, res) => {
 	return res.status(201).json(newUser);
 });
 
+// Update user route
 app.put('/users/:id', (req, res) => {
-	const { id } = req.params;
-	const user = users.find(user => user.id === parseInt(id, 10));
+	const id = parseInt(req.params.id, 10);
+
+	const user = users.find(user => user.id === id);
 
 	if (!user) {
 		return res.status(401).json({ message: `User with ID of ${id} is not found` });
@@ -107,10 +110,24 @@ app.put('/users/:id', (req, res) => {
 		return res.status(400).json(error.details);
 	}
 
-	const allUsers = users.filter(user => user.id !== parseInt(id, 10));
+	const allUsers = users.filter(user => user.id !== id);
 
 	users = [...allUsers, value];
-	return res.status(201).json(users);
+	return res.status(200).json(users);
+});
+
+app.delete('/users/:id', (req, res) => {
+	const id = parseInt(req.params.id, 10);
+
+	const user = users.find(user => user.id === id);
+
+	if (!user) {
+		return res.status(404).json({ message: 'User not found' });
+	}
+
+	users = users.filter(user => user.id !== id);
+
+	return res.status(200).json(users);
 });
 
 app.listen(PORT, console.log('Server running on port:' + PORT));
