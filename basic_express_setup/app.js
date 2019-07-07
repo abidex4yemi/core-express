@@ -70,17 +70,17 @@ app.get('/users/:id', (req, res) => {
 
 // Create new user route
 app.post('/users', (req, res) => {
-	if (req.body) {
+	if (req.body.name && req.body.email) {
 		const newUser = {
 			...req.body,
 			id: users.length + 1
 		};
 		users.push(newUser);
 
-		return res.status(201).json({ users });
+		return res.status(201).json(newUser);
 	}
 
-	return res.status(500).json({ message: 'Try again...' });
+	return res.status(400).json({ message: 'Try again...' });
 });
 
 app.listen(PORT, console.log('Server running on port:' + PORT));
