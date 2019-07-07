@@ -17,7 +17,7 @@ app.use(bodyParser.json());
 const PORT = process.env.PORT || 3000;
 
 // Initial list of users
-const users = [
+let users = [
 	{
 		id: 1,
 		name: 'Yemi',
@@ -91,6 +91,26 @@ app.post('/users', (req, res) => {
 	users.unshift(newUser);
 
 	return res.status(201).json(newUser);
+});
+
+app.put('/users/:id', (req, res) => {
+	const { id } = req.params;
+	const user = users.find(user => user.id === parseInt(id, 10));
+
+	if (!user) {
+		return res.status(401).json({ message: `User with ID of ${id} is not found` });
+	}
+
+	const { error, value } = validateUser(req);
+
+	if (error) {
+		return res.status(400).json(error.details);
+	}
+
+	const allUsers = users.filter(user => user.id !== parseInt(id, 10));
+
+	users = [...allUsers, value];
+	return res.status(201).json(users);
 });
 
 app.listen(PORT, console.log('Server running on port:' + PORT));
